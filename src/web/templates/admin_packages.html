@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OWO Token Yönetimi - Paketler</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/admin">
+                <i class="fas fa-shield-alt me-2"></i>Admin Panel
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin">
+                            <i class="fas fa-chart-line me-1"></i>Genel Bakış
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/users">
+                            <i class="fas fa-users me-1"></i>Kullanıcılar
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/tokens">
+                            <i class="fas fa-key me-1"></i>Tokenler
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/admin/packages">
+                            <i class="fas fa-box me-1"></i>Paketler
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/logs">
+                            <i class="fas fa-history me-1"></i>Log Kayıtları
+                        </a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <div id="connection-status" class="me-3"></div>
+                    <button class="btn btn-outline-light rounded-pill" onclick="logout()">
+                        <i class="fas fa-sign-out-alt me-1"></i>Çıkış
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid py-4">
+        <!-- Paket İstatistikleri -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-2">Toplam Paket</h6>
+                                <h2 class="display-6 mb-0" id="total-packages">0</h2>
+                            </div>
+                            <div class="icon-bg">
+                                <i class="fas fa-box fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-2">Aktif Paketler</h6>
+                                <h2 class="display-6 mb-0" id="active-packages">0</h2>
+                            </div>
+                            <div class="icon-bg">
+                                <i class="fas fa-check-circle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-2">Toplam Satış</h6>
+                                <h2 class="display-6 mb-0" id="total-sales">0</h2>
+                            </div>
+                            <div class="icon-bg">
+                                <i class="fas fa-shopping-cart fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-2">Aylık Satış</h6>
+                                <h2 class="display-6 mb-0" id="monthly-sales">0</h2>
+                            </div>
+                            <div class="icon-bg">
+                                <i class="fas fa-chart-line fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paket Listesi -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Paket Listesi</h5>
+                <button class="btn btn-primary btn-sm rounded-pill" onclick="showCreatePackageModal()">
+                    <i class="fas fa-plus me-1"></i>Yeni Paket
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table" id="packagesTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Paket Adı</th>
+                                <th>Açıklama</th>
+                                <th>Fiyat</th>
+                                <th>Token Limiti</th>
+                                <th>Durum</th>
+                                <th>Oluşturulma</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paket Oluşturma Modal -->
+    <div class="modal fade" id="createPackageModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Yeni Paket Oluştur</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createPackageForm">
+                        <div class="mb-3">
+                            <label class="form-label">Paket Adı</label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Açıklama</label>
+                            <textarea class="form-control" name="description" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Fiyat</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₺</span>
+                                <input type="number" class="form-control" name="price" min="0" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Token Limiti</label>
+                            <input type="number" class="form-control" name="token_limit" min="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Özellikler</label>
+                            <div id="features-container">
+                                <div class="input-group mb-2">
+                                    <input type="text" class="form-control" name="features[]" placeholder="Özellik">
+                                    <button type="button" class="btn btn-outline-danger" onclick="removeFeature(this)">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="addFeature()">
+                                <i class="fas fa-plus me-1"></i>Özellik Ekle
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="button" class="btn btn-primary" onclick="createPackage()">Oluştur</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paket Düzenleme Modal -->
+    <div class="modal fade" id="editPackageModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Paket Düzenle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editPackageForm">
+                        <input type="hidden" name="package_id">
+                        <div class="mb-3">
+                            <label class="form-label">Paket Adı</label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Açıklama</label>
+                            <textarea class="form-control" name="description" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Fiyat</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₺</span>
+                                <input type="number" class="form-control" name="price" min="0" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Token Limiti</label>
+                            <input type="number" class="form-control" name="token_limit" min="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Özellikler</label>
+                            <div id="edit-features-container">
+                                <!-- Özellikler dinamik olarak eklenecek -->
+                            </div>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="addEditFeature()">
+                                <i class="fas fa-plus me-1"></i>Özellik Ekle
+                            </button>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Durum</label>
+                            <select class="form-select" name="status" required>
+                                <option value="active">Aktif</option>
+                                <option value="inactive">Pasif</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="button" class="btn btn-primary" onclick="updatePackage()">Kaydet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script>
+        let packagesTable;
+
+        // İstatistikleri yükle
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/admin/package-stats');
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    document.getElementById('total-packages').textContent = data.total_packages;
+                    document.getElementById('active-packages').textContent = data.active_packages;
+                    document.getElementById('total-sales').textContent = data.total_sales;
+                    document.getElementById('monthly-sales').textContent = data.monthly_sales;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('İstatistikler yüklenirken bir hata oluştu!');
+            }
+        }
+
+        // Paketleri yükle
+        async function loadPackages() {
+            try {
+                const response = await fetch('/api/admin/packages');
+                if (response.ok) {
+                    const packages = await response.json();
+                    
+                    packagesTable.clear();
+                    packages.forEach(pkg => {
+                        packagesTable.row.add([
+                            pkg.id,
+                            pkg.name,
+                            pkg.description,
+                            `₺${pkg.price.toFixed(2)}`,
+                            pkg.token_limit,
+                            getStatusBadge(pkg.status),
+                            new Date(pkg.created_at).toLocaleString('tr-TR'),
+                            getActionButtons(pkg)
+                        ]);
+                    });
+                    packagesTable.draw();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Paketler yüklenirken bir hata oluştu!');
+            }
+        }
+
+        // Durum badge'i oluştur
+        function getStatusBadge(status) {
+            const badges = {
+                'active': '<span class="badge bg-success">Aktif</span>',
+                'inactive': '<span class="badge bg-secondary">Pasif</span>'
+            };
+            return badges[status] || '<span class="badge bg-secondary">Bilinmiyor</span>';
+        }
+
+        // İşlem butonlarını oluştur
+        function getActionButtons(pkg) {
+            return `
+                <button class="btn btn-sm btn-primary me-1" onclick="showEditPackageModal(${JSON.stringify(pkg).replace(/"/g, '&quot;')})">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="deletePackage(${pkg.id})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+        }
+
+        // Özellik ekle (yeni paket)
+        function addFeature() {
+            const container = document.getElementById('features-container');
+            const div = document.createElement('div');
+            div.className = 'input-group mb-2';
+            div.innerHTML = `
+                <input type="text" class="form-control" name="features[]" placeholder="Özellik">
+                <button type="button" class="btn btn-outline-danger" onclick="removeFeature(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            container.appendChild(div);
+        }
+
+        // Özellik ekle (düzenleme)
+        function addEditFeature() {
+            const container = document.getElementById('edit-features-container');
+            const div = document.createElement('div');
+            div.className = 'input-group mb-2';
+            div.innerHTML = `
+                <input type="text" class="form-control" name="features[]" placeholder="Özellik">
+                <button type="button" class="btn btn-outline-danger" onclick="removeFeature(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            container.appendChild(div);
+        }
+
+        // Özellik sil
+        function removeFeature(button) {
+            button.closest('.input-group').remove();
+        }
+
+        // Paket oluşturma modalını göster
+        function showCreatePackageModal() {
+            const modal = new bootstrap.Modal(document.getElementById('createPackageModal'));
+            document.getElementById('createPackageForm').reset();
+            document.getElementById('features-container').innerHTML = '';
+            addFeature(); // İlk özellik alanını ekle
+            modal.show();
+        }
+
+        // Paket düzenleme modalını göster
+        function showEditPackageModal(pkg) {
+            const form = document.getElementById('editPackageForm');
+            form.reset();
+            
+            form.querySelector('[name="package_id"]').value = pkg.id;
+            form.querySelector('[name="name"]').value = pkg.name;
+            form.querySelector('[name="description"]').value = pkg.description;
+            form.querySelector('[name="price"]').value = pkg.price;
+            form.querySelector('[name="token_limit"]').value = pkg.token_limit;
+            form.querySelector('[name="status"]').value = pkg.status;
+
+            // Özellikleri yükle
+            const container = document.getElementById('edit-features-container');
+            container.innerHTML = '';
+            pkg.features.forEach(feature => {
+                const div = document.createElement('div');
+                div.className = 'input-group mb-2';
+                div.innerHTML = `
+                    <input type="text" class="form-control" name="features[]" value="${feature}" placeholder="Özellik">
+                    <button type="button" class="btn btn-outline-danger" onclick="removeFeature(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+
+            const modal = new bootstrap.Modal(document.getElementById('editPackageModal'));
+            modal.show();
+        }
+
+        // Yeni paket oluştur
+        async function createPackage() {
+            const form = document.getElementById('createPackageForm');
+            const formData = new FormData(form);
+            
+            // Özellikleri diziye dönüştür
+            const features = Array.from(formData.getAll('features[]')).filter(f => f.trim());
+            
+            try {
+                const response = await fetch('/api/admin/packages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: formData.get('name'),
+                        description: formData.get('description'),
+                        price: parseFloat(formData.get('price')),
+                        token_limit: parseInt(formData.get('token_limit')),
+                        features: features
+                    })
+                });
+
+                if (response.ok) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('createPackageModal'));
+                    modal.hide();
+                    showAlert('Paket başarıyla oluşturuldu!', 'success');
+                    loadPackages();
+                    loadStats();
+                } else {
+                    const data = await response.json();
+                    showAlert(data.detail);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Paket oluşturulurken bir hata oluştu!');
+            }
+        }
+
+        // Paket güncelle
+        async function updatePackage() {
+            const form = document.getElementById('editPackageForm');
+            const formData = new FormData(form);
+            const packageId = formData.get('package_id');
+            
+            // Özellikleri diziye dönüştür
+            const features = Array.from(formData.getAll('features[]')).filter(f => f.trim());
+            
+            try {
+                const response = await fetch(`/api/admin/packages/${packageId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: formData.get('name'),
+                        description: formData.get('description'),
+                        price: parseFloat(formData.get('price')),
+                        token_limit: parseInt(formData.get('token_limit')),
+                        features: features,
+                        status: formData.get('status')
+                    })
+                });
+
+                if (response.ok) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editPackageModal'));
+                    modal.hide();
+                    showAlert('Paket başarıyla güncellendi!', 'success');
+                    loadPackages();
+                    loadStats();
+                } else {
+                    const data = await response.json();
+                    showAlert(data.detail);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Paket güncellenirken bir hata oluştu!');
+            }
+        }
+
+        // Paket sil
+        async function deletePackage(packageId) {
+            if (!confirm('Bu paketi silmek istediğinizden emin misiniz?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/packages/${packageId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showAlert('Paket başarıyla silindi!', 'success');
+                    loadPackages();
+                    loadStats();
+                } else {
+                    const data = await response.json();
+                    showAlert(data.detail);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Paket silinirken bir hata oluştu!');
+            }
+        }
+
+        // Çıkış fonksiyonu
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/';
+        }
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', () => {
+            // DataTable'ı başlat
+            packagesTable = $('#packagesTable').DataTable({
+                order: [[6, 'desc']],
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Tümü"]],
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/tr.json'
+                }
+            });
+
+            // İstatistikleri ve paketleri yükle
+            loadStats();
+            loadPackages();
+
+            // Her 5 dakikada bir güncelle
+            setInterval(() => {
+                loadStats();
+                loadPackages();
+            }, 300000);
+        });
+    </script>
+</body>
+</html> 

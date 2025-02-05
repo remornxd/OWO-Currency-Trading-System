@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OWO Token Yönetimi - Log Kayıtları</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/admin">
+                <i class="fas fa-shield-alt me-2"></i>Admin Panel
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin">
+                            <i class="fas fa-chart-line me-1"></i>Genel Bakış
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/users">
+                            <i class="fas fa-users me-1"></i>Kullanıcılar
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/tokens">
+                            <i class="fas fa-key me-1"></i>Tokenler
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/packages">
+                            <i class="fas fa-box me-1"></i>Paketler
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/admin/logs">
+                            <i class="fas fa-history me-1"></i>Log Kayıtları
+                        </a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <div id="connection-status" class="me-3"></div>
+                    <button class="btn btn-outline-light rounded-pill" onclick="logout()">
+                        <i class="fas fa-sign-out-alt me-1"></i>Çıkış
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid py-4">
+        <!-- Log İstatistikleri -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-2">Toplam Log</h6>
+                                <h2 class="display-6 mb-0" id="total-logs">0</h2>
+                            </div>
+                            <div class="icon-bg">
+                                <i class="fas fa-history fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-2">Başarılı İşlemler</h6>
+                                <h2 class="display-6 mb-0" id="success-logs">0</h2>
+                            </div>
+                            <div class="icon-bg">
+                                <i class="fas fa-check-circle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-danger text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-2">Hatalar</h6>
+                                <h2 class="display-6 mb-0" id="error-logs">0</h2>
+                            </div>
+                            <div class="icon-bg">
+                                <i class="fas fa-exclamation-circle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-2">Bugünkü Loglar</h6>
+                                <h2 class="display-6 mb-0" id="today-logs">0</h2>
+                            </div>
+                            <div class="icon-bg">
+                                <i class="fas fa-calendar-day fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Log Filtreleri -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Log Filtreleri</h5>
+            </div>
+            <div class="card-body">
+                <form id="logFilterForm" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Log Tipi</label>
+                        <select class="form-select" name="log_type">
+                            <option value="">Tümü</option>
+                            <option value="info">Bilgi</option>
+                            <option value="success">Başarılı</option>
+                            <option value="warning">Uyarı</option>
+                            <option value="error">Hata</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Kullanıcı</label>
+                        <select class="form-select" name="user_id">
+                            <option value="">Tümü</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Başlangıç Tarihi</label>
+                        <input type="datetime-local" class="form-control" name="start_date">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Bitiş Tarihi</label>
+                        <input type="datetime-local" class="form-control" name="end_date">
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-filter me-1"></i>Filtrele
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="resetFilters()">
+                            <i class="fas fa-undo me-1"></i>Sıfırla
+                        </button>
+                        <button type="button" class="btn btn-success float-end" onclick="exportLogs()">
+                            <i class="fas fa-file-export me-1"></i>Dışa Aktar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Log Listesi -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Log Listesi</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table" id="logsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tarih</th>
+                                <th>Kullanıcı</th>
+                                <th>İşlem</th>
+                                <th>Tip</th>
+                                <th>Mesaj</th>
+                                <th>Detaylar</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log Detay Modal -->
+    <div class="modal fade" id="logDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Log Detayları</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Log ID</label>
+                                <input type="text" class="form-control" id="detail-log-id" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Tarih</label>
+                                <input type="text" class="form-control" id="detail-date" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Kullanıcı</label>
+                                <input type="text" class="form-control" id="detail-user" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">İşlem</label>
+                                <input type="text" class="form-control" id="detail-action" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Tip</label>
+                                <input type="text" class="form-control" id="detail-type" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">IP Adresi</label>
+                                <input type="text" class="form-control" id="detail-ip" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">User Agent</label>
+                                <input type="text" class="form-control" id="detail-user-agent" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Referrer</label>
+                                <input type="text" class="form-control" id="detail-referrer" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mesaj</label>
+                        <textarea class="form-control" id="detail-message" rows="2" readonly></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ek Bilgiler</label>
+                        <pre class="bg-light p-3 rounded" id="detail-extra"></pre>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script>
+        let logsTable;
+
+        // İstatistikleri yükle
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/admin/log-stats');
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    document.getElementById('total-logs').textContent = data.total_logs;
+                    document.getElementById('success-logs').textContent = data.success_logs;
+                    document.getElementById('error-logs').textContent = data.error_logs;
+                    document.getElementById('today-logs').textContent = data.today_logs;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('İstatistikler yüklenirken bir hata oluştu!');
+            }
+        }
+
+        // Kullanıcıları yükle
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/admin/users');
+                if (response.ok) {
+                    const users = await response.json();
+                    const select = document.querySelector('[name="user_id"]');
+                    
+                    users.forEach(user => {
+                        const option = document.createElement('option');
+                        option.value = user.id;
+                        option.textContent = user.username;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Kullanıcılar yüklenirken bir hata oluştu!');
+            }
+        }
+
+        // Logları yükle
+        async function loadLogs() {
+            try {
+                const formData = new FormData(document.getElementById('logFilterForm'));
+                const params = new URLSearchParams();
+                
+                for (let [key, value] of formData.entries()) {
+                    if (value) params.append(key, value);
+                }
+
+                const response = await fetch(`/api/admin/logs?${params.toString()}`);
+                if (response.ok) {
+                    const logs = await response.json();
+                    
+                    logsTable.clear();
+                    logs.forEach(log => {
+                        logsTable.row.add([
+                            log.id,
+                            new Date(log.created_at).toLocaleString('tr-TR'),
+                            log.username,
+                            log.action,
+                            getTypeBadge(log.type),
+                            log.message,
+                            `<button class="btn btn-sm btn-info" onclick="showLogDetail(${log.id})">
+                                <i class="fas fa-info-circle"></i>
+                            </button>`
+                        ]);
+                    });
+                    logsTable.draw();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Loglar yüklenirken bir hata oluştu!');
+            }
+        }
+
+        // Log tipi badge'i oluştur
+        function getTypeBadge(type) {
+            const badges = {
+                'info': '<span class="badge bg-info">Bilgi</span>',
+                'success': '<span class="badge bg-success">Başarılı</span>',
+                'warning': '<span class="badge bg-warning">Uyarı</span>',
+                'error': '<span class="badge bg-danger">Hata</span>'
+            };
+            return badges[type] || '<span class="badge bg-secondary">Bilinmiyor</span>';
+        }
+
+        // Log detaylarını göster
+        async function showLogDetail(logId) {
+            try {
+                const response = await fetch(`/api/admin/logs/${logId}`);
+                if (response.ok) {
+                    const log = await response.json();
+                    
+                    document.getElementById('detail-log-id').value = log.id;
+                    document.getElementById('detail-date').value = new Date(log.created_at).toLocaleString('tr-TR');
+                    document.getElementById('detail-user').value = log.username;
+                    document.getElementById('detail-action').value = log.action;
+                    document.getElementById('detail-type').value = log.type;
+                    document.getElementById('detail-ip').value = log.ip_address;
+                    document.getElementById('detail-user-agent').value = log.user_agent;
+                    document.getElementById('detail-referrer').value = log.referrer;
+                    document.getElementById('detail-message').value = log.message;
+                    document.getElementById('detail-extra').textContent = JSON.stringify(log.extra_data, null, 2);
+
+                    const modal = new bootstrap.Modal(document.getElementById('logDetailModal'));
+                    modal.show();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Log detayları yüklenirken bir hata oluştu!');
+            }
+        }
+
+        // Filtreleri sıfırla
+        function resetFilters() {
+            document.getElementById('logFilterForm').reset();
+            loadLogs();
+        }
+
+        // Logları dışa aktar
+        async function exportLogs() {
+            try {
+                const formData = new FormData(document.getElementById('logFilterForm'));
+                const params = new URLSearchParams();
+                
+                for (let [key, value] of formData.entries()) {
+                    if (value) params.append(key, value);
+                }
+
+                const response = await fetch(`/api/admin/logs/export?${params.toString()}`);
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'logs.csv';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    a.remove();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Loglar dışa aktarılırken bir hata oluştu!');
+            }
+        }
+
+        // Çıkış fonksiyonu
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/';
+        }
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', () => {
+            // DataTable'ı başlat
+            logsTable = $('#logsTable').DataTable({
+                order: [[1, 'desc']],
+                pageLength: 25,
+                lengthMenu: [[25, 50, 100, -1], [25, 50, 100, "Tümü"]],
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/tr.json'
+                }
+            });
+
+            // Form submit olduğunda
+            document.getElementById('logFilterForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                loadLogs();
+            });
+
+            // İstatistikleri, kullanıcıları ve logları yükle
+            loadStats();
+            loadUsers();
+            loadLogs();
+
+            // Her 5 dakikada bir güncelle
+            setInterval(() => {
+                loadStats();
+                loadLogs();
+            }, 300000);
+        });
+    </script>
+</body>
+</html> 

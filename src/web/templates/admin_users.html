@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OWO Token Yönetimi - Kullanıcılar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/admin">
+                <i class="fas fa-shield-alt me-2"></i>Admin Panel
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin">
+                            <i class="fas fa-chart-line me-1"></i>Genel Bakış
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/admin/users">
+                            <i class="fas fa-users me-1"></i>Kullanıcılar
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/tokens">
+                            <i class="fas fa-key me-1"></i>Tokenler
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/packages">
+                            <i class="fas fa-box me-1"></i>Paketler
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/logs">
+                            <i class="fas fa-history me-1"></i>Log Kayıtları
+                        </a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <div id="connection-status" class="me-3"></div>
+                    <button class="btn btn-outline-light rounded-pill" onclick="logout()">
+                        <i class="fas fa-sign-out-alt me-1"></i>Çıkış
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid py-4">
+        <!-- Kullanıcı İstatistikleri -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-2">Toplam Kullanıcı</h6>
+                                <h2 class="display-6 mb-0" id="total-users">0</h2>
+                            </div>
+                            <div class="icon-bg">
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-2">Aktif Kullanıcılar</h6>
+                                <h2 class="display-6 mb-0" id="active-users">0</h2>
+                            </div>
+                            <div class="icon-bg">
+                                <i class="fas fa-user-check fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-2">Premium Kullanıcılar</h6>
+                                <h2 class="display-6 mb-0" id="premium-users">0</h2>
+                            </div>
+                            <div class="icon-bg">
+                                <i class="fas fa-crown fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-2">Yeni Kullanıcılar (24s)</h6>
+                                <h2 class="display-6 mb-0" id="new-users">0</h2>
+                            </div>
+                            <div class="icon-bg">
+                                <i class="fas fa-user-plus fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kullanıcı Listesi -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Kullanıcı Listesi</h5>
+                <button class="btn btn-primary btn-sm rounded-pill" onclick="showCreateUserModal()">
+                    <i class="fas fa-plus me-1"></i>Yeni Kullanıcı
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table" id="usersTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Kullanıcı Adı</th>
+                                <th>E-posta</th>
+                                <th>Paket</th>
+                                <th>Token Sayısı</th>
+                                <th>Durum</th>
+                                <th>Kayıt Tarihi</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kullanıcı Oluşturma Modal -->
+    <div class="modal fade" id="createUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Yeni Kullanıcı Oluştur</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createUserForm">
+                        <div class="mb-3">
+                            <label class="form-label">Kullanıcı Adı</label>
+                            <input type="text" class="form-control" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">E-posta</label>
+                            <input type="email" class="form-control" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Şifre</label>
+                            <input type="password" class="form-control" name="password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Paket Tipi</label>
+                            <select class="form-select" name="package_type" required>
+                                <option value="1">Başlangıç Paketi</option>
+                                <option value="2">Orta Paket</option>
+                                <option value="3">Pro Paket</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="button" class="btn btn-primary" onclick="createUser()">Oluştur</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kullanıcı Düzenleme Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Kullanıcı Düzenle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editUserForm">
+                        <input type="hidden" name="user_id">
+                        <div class="mb-3">
+                            <label class="form-label">Kullanıcı Adı</label>
+                            <input type="text" class="form-control" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">E-posta</label>
+                            <input type="email" class="form-control" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Yeni Şifre</label>
+                            <input type="password" class="form-control" name="password" placeholder="Değiştirmek için doldurun">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Paket Tipi</label>
+                            <select class="form-select" name="package_type" required>
+                                <option value="1">Başlangıç Paketi</option>
+                                <option value="2">Orta Paket</option>
+                                <option value="3">Pro Paket</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Durum</label>
+                            <select class="form-select" name="status" required>
+                                <option value="active">Aktif</option>
+                                <option value="suspended">Askıya Alınmış</option>
+                                <option value="banned">Yasaklı</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="button" class="btn btn-primary" onclick="updateUser()">Kaydet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script>
+        let usersTable;
+
+        // İstatistikleri yükle
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/admin/user-stats');
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    document.getElementById('total-users').textContent = data.total_users;
+                    document.getElementById('active-users').textContent = data.active_users;
+                    document.getElementById('premium-users').textContent = data.premium_users;
+                    document.getElementById('new-users').textContent = data.new_users;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('İstatistikler yüklenirken bir hata oluştu!');
+            }
+        }
+
+        // Kullanıcıları yükle
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/admin/users');
+                if (response.ok) {
+                    const users = await response.json();
+                    
+                    usersTable.clear();
+                    users.forEach(user => {
+                        usersTable.row.add([
+                            user.id,
+                            user.username,
+                            user.email,
+                            getPackageName(user.package_type),
+                            user.token_count,
+                            getStatusBadge(user.status),
+                            new Date(user.created_at).toLocaleString('tr-TR'),
+                            getActionButtons(user)
+                        ]);
+                    });
+                    usersTable.draw();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Kullanıcılar yüklenirken bir hata oluştu!');
+            }
+        }
+
+        // Paket adını getir
+        function getPackageName(type) {
+            const packages = {
+                1: 'Başlangıç',
+                2: 'Orta',
+                3: 'Pro'
+            };
+            return packages[type] || 'Bilinmiyor';
+        }
+
+        // Durum badge'i oluştur
+        function getStatusBadge(status) {
+            const badges = {
+                'active': '<span class="badge bg-success">Aktif</span>',
+                'suspended': '<span class="badge bg-warning">Askıda</span>',
+                'banned': '<span class="badge bg-danger">Yasaklı</span>'
+            };
+            return badges[status] || '<span class="badge bg-secondary">Bilinmiyor</span>';
+        }
+
+        // İşlem butonlarını oluştur
+        function getActionButtons(user) {
+            return `
+                <button class="btn btn-sm btn-primary me-1" onclick="showEditUserModal(${JSON.stringify(user).replace(/"/g, '&quot;')})">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="deleteUser(${user.id})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+        }
+
+        // Kullanıcı oluşturma modalını göster
+        function showCreateUserModal() {
+            const modal = new bootstrap.Modal(document.getElementById('createUserModal'));
+            document.getElementById('createUserForm').reset();
+            modal.show();
+        }
+
+        // Kullanıcı düzenleme modalını göster
+        function showEditUserModal(user) {
+            const form = document.getElementById('editUserForm');
+            form.reset();
+            
+            form.querySelector('[name="user_id"]').value = user.id;
+            form.querySelector('[name="username"]').value = user.username;
+            form.querySelector('[name="email"]').value = user.email;
+            form.querySelector('[name="package_type"]').value = user.package_type;
+            form.querySelector('[name="status"]').value = user.status;
+
+            const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
+            modal.show();
+        }
+
+        // Yeni kullanıcı oluştur
+        async function createUser() {
+            const form = document.getElementById('createUserForm');
+            const formData = new FormData(form);
+            
+            try {
+                const response = await fetch('/api/admin/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(Object.fromEntries(formData))
+                });
+
+                if (response.ok) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('createUserModal'));
+                    modal.hide();
+                    showAlert('Kullanıcı başarıyla oluşturuldu!', 'success');
+                    loadUsers();
+                    loadStats();
+                } else {
+                    const data = await response.json();
+                    showAlert(data.detail);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Kullanıcı oluşturulurken bir hata oluştu!');
+            }
+        }
+
+        // Kullanıcı güncelle
+        async function updateUser() {
+            const form = document.getElementById('editUserForm');
+            const formData = new FormData(form);
+            const userId = formData.get('user_id');
+            
+            try {
+                const response = await fetch(`/api/admin/users/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(Object.fromEntries(formData))
+                });
+
+                if (response.ok) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editUserModal'));
+                    modal.hide();
+                    showAlert('Kullanıcı başarıyla güncellendi!', 'success');
+                    loadUsers();
+                    loadStats();
+                } else {
+                    const data = await response.json();
+                    showAlert(data.detail);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Kullanıcı güncellenirken bir hata oluştu!');
+            }
+        }
+
+        // Kullanıcı sil
+        async function deleteUser(userId) {
+            if (!confirm('Bu kullanıcıyı silmek istediğinizden emin misiniz?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/users/${userId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showAlert('Kullanıcı başarıyla silindi!', 'success');
+                    loadUsers();
+                    loadStats();
+                } else {
+                    const data = await response.json();
+                    showAlert(data.detail);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Kullanıcı silinirken bir hata oluştu!');
+            }
+        }
+
+        // Çıkış fonksiyonu
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/';
+        }
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', () => {
+            // DataTable'ı başlat
+            usersTable = $('#usersTable').DataTable({
+                order: [[6, 'desc']],
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Tümü"]],
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/tr.json'
+                }
+            });
+
+            // İstatistikleri ve kullanıcıları yükle
+            loadStats();
+            loadUsers();
+
+            // Her 5 dakikada bir güncelle
+            setInterval(() => {
+                loadStats();
+                loadUsers();
+            }, 300000);
+        });
+    </script>
+</body>
+</html> 

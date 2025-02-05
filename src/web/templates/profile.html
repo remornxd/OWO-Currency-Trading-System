@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OWO Token Yönetimi - Profil</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/dashboard">
+                <i class="fas fa-robot me-2"></i>OWO Token Yönetimi
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">
+                            <i class="fas fa-home me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/profile">
+                            <i class="fas fa-user me-1"></i>Profil
+                        </a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <div id="connection-status" class="me-3"></div>
+                    <button class="btn btn-outline-light rounded-pill" onclick="logout()">
+                        <i class="fas fa-sign-out-alt me-1"></i>Çıkış
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container py-4">
+        <div class="row">
+            <!-- Profil Bilgileri -->
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Profil Bilgileri</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <div class="avatar mb-3">
+                                <i class="fas fa-user-circle fa-5x text-primary"></i>
+                            </div>
+                            <h5 class="mb-1" id="username"></h5>
+                            <p class="text-muted mb-0" id="email"></p>
+                        </div>
+                        <div class="border-top pt-3">
+                            <div class="row text-center">
+                                <div class="col">
+                                    <h6 class="mb-1" id="total-owo">0</h6>
+                                    <small class="text-muted">Toplam OWO</small>
+                                </div>
+                                <div class="col">
+                                    <h6 class="mb-1" id="total-messages">0</h6>
+                                    <small class="text-muted">Toplam Mesaj</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paket Bilgisi -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Paket Bilgisi</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="package-info" id="package-info">
+                            <h6 class="package-name mb-2"></h6>
+                            <p class="package-amount mb-2"></p>
+                            <div class="progress mb-3">
+                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small class="text-muted">Kalan süre: <span id="remaining-time">-</span></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ayarlar -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Hesap Ayarları</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="settings-form">
+                            <!-- Profil Ayarları -->
+                            <h6 class="mb-3">Profil Ayarları</h6>
+                            <div class="mb-3">
+                                <label class="form-label">Kullanıcı Adı</label>
+                                <input type="text" class="form-control" name="username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">E-posta</label>
+                                <input type="email" class="form-control" name="email">
+                            </div>
+
+                            <!-- Şifre Değiştirme -->
+                            <h6 class="mb-3 mt-4">Şifre Değiştirme</h6>
+                            <div class="mb-3">
+                                <label class="form-label">Mevcut Şifre</label>
+                                <input type="password" class="form-control" name="current_password">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Yeni Şifre</label>
+                                <input type="password" class="form-control" name="new_password">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Yeni Şifre (Tekrar)</label>
+                                <input type="password" class="form-control" name="confirm_password">
+                            </div>
+
+                            <!-- Bildirim Ayarları -->
+                            <h6 class="mb-3 mt-4">Bildirim Ayarları</h6>
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="notify_status" id="notify_status">
+                                    <label class="form-check-label" for="notify_status">Token Durum Bildirimleri</label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="notify_balance" id="notify_balance">
+                                    <label class="form-check-label" for="notify_balance">Bakiye Bildirimleri</label>
+                                </div>
+                            </div>
+
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>Değişiklikleri Kaydet
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script>
+        // Profil verilerini yükle
+        async function loadProfile() {
+            try {
+                const response = await fetch('/api/profile');
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Profil bilgilerini doldur
+                    document.getElementById('username').textContent = data.username;
+                    document.getElementById('email').textContent = data.email || 'E-posta eklenmemiş';
+                    document.getElementById('total-owo').textContent = new Intl.NumberFormat('tr-TR').format(data.total_owo);
+                    document.getElementById('total-messages').textContent = new Intl.NumberFormat('tr-TR').format(data.total_messages);
+
+                    // Form alanlarını doldur
+                    document.querySelector('input[name="username"]').value = data.username;
+                    document.querySelector('input[name="email"]').value = data.email || '';
+                    document.querySelector('input[name="notify_status"]').checked = data.notifications?.status || false;
+                    document.querySelector('input[name="notify_balance"]').checked = data.notifications?.balance || false;
+
+                    // Paket bilgilerini doldur
+                    const packageInfo = document.getElementById('package-info');
+                    packageInfo.querySelector('.package-name').textContent = data.package.name;
+                    packageInfo.querySelector('.package-amount').textContent = data.package.amount;
+                    
+                    // İlerleme çubuğunu güncelle
+                    const progress = (data.package.current / data.package.target) * 100;
+                    packageInfo.querySelector('.progress-bar').style.width = `${progress}%`;
+                    packageInfo.querySelector('.progress-bar').setAttribute('aria-valuenow', progress);
+
+                    // Kalan süreyi hesapla
+                    if (data.package.expires_at) {
+                        const expires = new Date(data.package.expires_at);
+                        const now = new Date();
+                        const days = Math.ceil((expires - now) / (1000 * 60 * 60 * 24));
+                        document.getElementById('remaining-time').textContent = `${days} gün`;
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Profil bilgileri yüklenirken bir hata oluştu!');
+            }
+        }
+
+        // Ayarları kaydet
+        document.getElementById('settings-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            try {
+                const response = await fetch('/api/profile/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(Object.fromEntries(formData))
+                });
+
+                if (response.ok) {
+                    showAlert('Ayarlar başarıyla kaydedildi!', 'success');
+                    loadProfile();
+                } else {
+                    const data = await response.json();
+                    showAlert(data.detail);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Ayarlar kaydedilirken bir hata oluştu!');
+            }
+        });
+
+        // Çıkış fonksiyonu
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/';
+        }
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProfile();
+        });
+    </script>
+</body>
+</html> 

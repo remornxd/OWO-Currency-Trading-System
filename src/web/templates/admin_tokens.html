@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OWO Token Yönetimi - Tokenler</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/admin">
+                <i class="fas fa-shield-alt me-2"></i>Admin Panel
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin">
+                            <i class="fas fa-chart-line me-1"></i>Genel Bakış
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/users">
+                            <i class="fas fa-users me-1"></i>Kullanıcılar
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/admin/tokens">
+                            <i class="fas fa-key me-1"></i>Tokenler
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/packages">
+                            <i class="fas fa-box me-1"></i>Paketler
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/logs">
+                            <i class="fas fa-history me-1"></i>Log Kayıtları
+                        </a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <div id="connection-status" class="me-3"></div>
+                    <button class="btn btn-outline-light rounded-pill" onclick="logout()">
+                        <i class="fas fa-sign-out-alt me-1"></i>Çıkış
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid py-4">
+        <!-- Token İstatistikleri -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-2">Toplam Token</h6>
+                                <h2 class="display-6 mb-0" id="total-tokens">0</h2>
+                            </div>
+                            <div class="icon-bg">
+                                <i class="fas fa-key fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-2">Aktif Tokenler</h6>
+                                <h2 class="display-6 mb-0" id="active-tokens">0</h2>
+                            </div>
+                            <div class="icon-bg">
+                                <i class="fas fa-check-circle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-2">Toplam OWO</h6>
+                                <h2 class="display-6 mb-0" id="total-owo">0</h2>
+                            </div>
+                            <div class="icon-bg">
+                                <i class="fas fa-coins fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-danger text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-2">Yasaklı Tokenler</h6>
+                                <h2 class="display-6 mb-0" id="banned-tokens">0</h2>
+                            </div>
+                            <div class="icon-bg">
+                                <i class="fas fa-ban fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Token Listesi -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Token Listesi</h5>
+                <div>
+                    <button class="btn btn-success btn-sm rounded-pill me-2" onclick="startAllTokens()">
+                        <i class="fas fa-play me-1"></i>Tümünü Başlat
+                    </button>
+                    <button class="btn btn-danger btn-sm rounded-pill me-2" onclick="stopAllTokens()">
+                        <i class="fas fa-stop me-1"></i>Tümünü Durdur
+                    </button>
+                    <button class="btn btn-primary btn-sm rounded-pill" onclick="showImportTokensModal()">
+                        <i class="fas fa-file-import me-1"></i>Token İçe Aktar
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table" id="tokensTable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="selectAllTokens">
+                                    </div>
+                                </th>
+                                <th>Token ID</th>
+                                <th>Kullanıcı</th>
+                                <th>OWO Bakiye</th>
+                                <th>Durum</th>
+                                <th>Son Aktivite</th>
+                                <th>Oluşturulma</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Token İçe Aktarma Modal -->
+    <div class="modal fade" id="importTokensModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Token İçe Aktar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="importTokensForm">
+                        <div class="mb-3">
+                            <label class="form-label">Kullanıcı</label>
+                            <select class="form-select" name="user_id" required>
+                                <option value="">Kullanıcı Seçin</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tokenler</label>
+                            <textarea class="form-control" name="tokens" rows="5" placeholder="Her satıra bir token gelecek şekilde girin" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="button" class="btn btn-primary" onclick="importTokens()">İçe Aktar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Token Detay Modal -->
+    <div class="modal fade" id="tokenDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Token Detayları</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Token ID</label>
+                                <input type="text" class="form-control" id="detail-token-id" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Kullanıcı</label>
+                                <input type="text" class="form-control" id="detail-username" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">OWO Bakiye</label>
+                                <input type="text" class="form-control" id="detail-balance" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Durum</label>
+                                <input type="text" class="form-control" id="detail-status" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Son Aktivite</label>
+                                <input type="text" class="form-control" id="detail-last-activity" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Oluşturulma Tarihi</label>
+                                <input type="text" class="form-control" id="detail-created-at" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Toplam İşlem</label>
+                                <input type="text" class="form-control" id="detail-total-transactions" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Hata Sayısı</label>
+                                <input type="text" class="form-control" id="detail-error-count" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <h6>Son Hatalar</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm" id="errorLogsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Tarih</th>
+                                        <th>Hata Mesajı</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script>
+        let tokensTable;
+        let selectedTokens = new Set();
+
+        // İstatistikleri yükle
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/admin/token-stats');
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    document.getElementById('total-tokens').textContent = data.total_tokens;
+                    document.getElementById('active-tokens').textContent = data.active_tokens;
+                    document.getElementById('total-owo').textContent = new Intl.NumberFormat('tr-TR').format(data.total_owo);
+                    document.getElementById('banned-tokens').textContent = data.banned_tokens;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('İstatistikler yüklenirken bir hata oluştu!');
+            }
+        }
+
+        // Tokenleri yükle
+        async function loadTokens() {
+            try {
+                const response = await fetch('/api/admin/tokens');
+                if (response.ok) {
+                    const tokens = await response.json();
+                    
+                    tokensTable.clear();
+                    tokens.forEach(token => {
+                        tokensTable.row.add([
+                            `<div class="form-check">
+                                <input class="form-check-input token-checkbox" type="checkbox" value="${token.id}">
+                            </div>`,
+                            token.id,
+                            token.username,
+                            new Intl.NumberFormat('tr-TR').format(token.balance),
+                            getStatusBadge(token.status),
+                            new Date(token.last_activity).toLocaleString('tr-TR'),
+                            new Date(token.created_at).toLocaleString('tr-TR'),
+                            getActionButtons(token)
+                        ]);
+                    });
+                    tokensTable.draw();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Tokenler yüklenirken bir hata oluştu!');
+            }
+        }
+
+        // Durum badge'i oluştur
+        function getStatusBadge(status) {
+            const badges = {
+                'active': '<span class="badge bg-success">Aktif</span>',
+                'inactive': '<span class="badge bg-secondary">Pasif</span>',
+                'running': '<span class="badge bg-primary">Çalışıyor</span>',
+                'error': '<span class="badge bg-danger">Hata</span>',
+                'banned': '<span class="badge bg-danger">Yasaklı</span>'
+            };
+            return badges[status] || '<span class="badge bg-secondary">Bilinmiyor</span>';
+        }
+
+        // İşlem butonlarını oluştur
+        function getActionButtons(token) {
+            return `
+                <button class="btn btn-sm btn-info me-1" onclick="showTokenDetail('${token.id}')">
+                    <i class="fas fa-info-circle"></i>
+                </button>
+                ${token.status === 'running' ? `
+                    <button class="btn btn-sm btn-danger me-1" onclick="stopToken('${token.id}')">
+                        <i class="fas fa-stop"></i>
+                    </button>
+                ` : `
+                    <button class="btn btn-sm btn-success me-1" onclick="startToken('${token.id}')">
+                        <i class="fas fa-play"></i>
+                    </button>
+                `}
+                <button class="btn btn-sm btn-danger" onclick="deleteToken('${token.id}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+        }
+
+        // Token detaylarını göster
+        async function showTokenDetail(tokenId) {
+            try {
+                const response = await fetch(`/api/admin/tokens/${tokenId}`);
+                if (response.ok) {
+                    const token = await response.json();
+                    
+                    // Detay alanlarını doldur
+                    document.getElementById('detail-token-id').value = token.id;
+                    document.getElementById('detail-username').value = token.username;
+                    document.getElementById('detail-balance').value = new Intl.NumberFormat('tr-TR').format(token.balance);
+                    document.getElementById('detail-status').value = token.status;
+                    document.getElementById('detail-last-activity').value = new Date(token.last_activity).toLocaleString('tr-TR');
+                    document.getElementById('detail-created-at').value = new Date(token.created_at).toLocaleString('tr-TR');
+                    document.getElementById('detail-total-transactions').value = token.total_transactions;
+                    document.getElementById('detail-error-count').value = token.error_count;
+
+                    // Hata loglarını doldur
+                    const errorTable = document.getElementById('errorLogsTable').getElementsByTagName('tbody')[0];
+                    errorTable.innerHTML = '';
+                    token.error_logs.forEach(log => {
+                        const row = errorTable.insertRow();
+                        row.insertCell(0).textContent = new Date(log.date).toLocaleString('tr-TR');
+                        row.insertCell(1).textContent = log.message;
+                    });
+
+                    // Modalı göster
+                    const modal = new bootstrap.Modal(document.getElementById('tokenDetailModal'));
+                    modal.show();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Token detayları yüklenirken bir hata oluştu!');
+            }
+        }
+
+        // Token içe aktarma modalını göster
+        async function showImportTokensModal() {
+            try {
+                // Kullanıcıları yükle
+                const response = await fetch('/api/admin/users');
+                if (response.ok) {
+                    const users = await response.json();
+                    const select = document.querySelector('#importTokensForm [name="user_id"]');
+                    
+                    // Mevcut seçenekleri temizle
+                    select.innerHTML = '<option value="">Kullanıcı Seçin</option>';
+                    
+                    // Kullanıcıları ekle
+                    users.forEach(user => {
+                        const option = document.createElement('option');
+                        option.value = user.id;
+                        option.textContent = user.username;
+                        select.appendChild(option);
+                    });
+
+                    // Formu temizle ve modalı göster
+                    document.getElementById('importTokensForm').reset();
+                    const modal = new bootstrap.Modal(document.getElementById('importTokensModal'));
+                    modal.show();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Kullanıcılar yüklenirken bir hata oluştu!');
+            }
+        }
+
+        // Tokenleri içe aktar
+        async function importTokens() {
+            const form = document.getElementById('importTokensForm');
+            const formData = new FormData(form);
+            
+            // Tokenleri satır satır ayır
+            const tokens = formData.get('tokens').split('\n').map(t => t.trim()).filter(t => t);
+            
+            try {
+                const response = await fetch('/api/admin/tokens/import', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: formData.get('user_id'),
+                        tokens: tokens
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('importTokensModal'));
+                    modal.hide();
+                    
+                    showAlert(`${data.imported} token başarıyla içe aktarıldı!`, 'success');
+                    loadTokens();
+                    loadStats();
+                } else {
+                    const data = await response.json();
+                    showAlert(data.detail);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Tokenler içe aktarılırken bir hata oluştu!');
+            }
+        }
+
+        // Token başlat
+        async function startToken(tokenId) {
+            try {
+                const response = await fetch(`/api/admin/tokens/${tokenId}/start`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    showAlert('Token başarıyla başlatıldı!', 'success');
+                    loadTokens();
+                    loadStats();
+                } else {
+                    const data = await response.json();
+                    showAlert(data.detail);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Token başlatılırken bir hata oluştu!');
+            }
+        }
+
+        // Token durdur
+        async function stopToken(tokenId) {
+            try {
+                const response = await fetch(`/api/admin/tokens/${tokenId}/stop`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    showAlert('Token başarıyla durduruldu!', 'success');
+                    loadTokens();
+                    loadStats();
+                } else {
+                    const data = await response.json();
+                    showAlert(data.detail);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Token durdurulurken bir hata oluştu!');
+            }
+        }
+
+        // Token sil
+        async function deleteToken(tokenId) {
+            if (!confirm('Bu tokeni silmek istediğinizden emin misiniz?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/tokens/${tokenId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showAlert('Token başarıyla silindi!', 'success');
+                    loadTokens();
+                    loadStats();
+                } else {
+                    const data = await response.json();
+                    showAlert(data.detail);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Token silinirken bir hata oluştu!');
+            }
+        }
+
+        // Tüm tokenleri başlat
+        async function startAllTokens() {
+            const tokens = Array.from(selectedTokens);
+            if (tokens.length === 0) {
+                showAlert('Lütfen başlatmak istediğiniz tokenleri seçin!');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/tokens/start-multiple', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ token_ids: tokens })
+                });
+
+                if (response.ok) {
+                    showAlert('Seçili tokenler başarıyla başlatıldı!', 'success');
+                    loadTokens();
+                    loadStats();
+                } else {
+                    const data = await response.json();
+                    showAlert(data.detail);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Tokenler başlatılırken bir hata oluştu!');
+            }
+        }
+
+        // Tüm tokenleri durdur
+        async function stopAllTokens() {
+            const tokens = Array.from(selectedTokens);
+            if (tokens.length === 0) {
+                showAlert('Lütfen durdurmak istediğiniz tokenleri seçin!');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/tokens/stop-multiple', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ token_ids: tokens })
+                });
+
+                if (response.ok) {
+                    showAlert('Seçili tokenler başarıyla durduruldu!', 'success');
+                    loadTokens();
+                    loadStats();
+                } else {
+                    const data = await response.json();
+                    showAlert(data.detail);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Tokenler durdurulurken bir hata oluştu!');
+            }
+        }
+
+        // Çıkış fonksiyonu
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/';
+        }
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', () => {
+            // DataTable'ı başlat
+            tokensTable = $('#tokensTable').DataTable({
+                order: [[5, 'desc']],
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Tümü"]],
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/tr.json'
+                }
+            });
+
+            // Tümünü seç/kaldır
+            document.getElementById('selectAllTokens').addEventListener('change', function() {
+                const checkboxes = document.getElementsByClassName('token-checkbox');
+                Array.from(checkboxes).forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                    if (this.checked) {
+                        selectedTokens.add(checkbox.value);
+                    } else {
+                        selectedTokens.delete(checkbox.value);
+                    }
+                });
+            });
+
+            // Token seçimi değiştiğinde
+            $('#tokensTable').on('change', '.token-checkbox', function() {
+                if (this.checked) {
+                    selectedTokens.add(this.value);
+                } else {
+                    selectedTokens.delete(this.value);
+                }
+            });
+
+            // İstatistikleri ve tokenleri yükle
+            loadStats();
+            loadTokens();
+
+            // Her 5 dakikada bir güncelle
+            setInterval(() => {
+                loadStats();
+                loadTokens();
+            }, 300000);
+        });
+    </script>
+</body>
+</html> 

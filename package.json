@@ -1,0 +1,16 @@
+{
+  "name": "owo-system-bot-scripts",
+  "version": "1.0.0",
+  "description": "OWO Currency Trading System (remornn sizi seviyor)",
+  "main": "src/main.py",
+  "scripts": {
+    "start": "python src/main.py",
+    "web": "python -m uvicorn src.web.main:app --reload",
+    "bot": "python src/bot/bot.py"
+  },
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "mongoose": "^8.0.0",
+    "dotenv": "^16.3.1"
+  }
+} 
